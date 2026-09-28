@@ -42,8 +42,8 @@ let nextId = 4;
 // GET /
 app.get("/", (req, res) => {
   res.status(200).json({
-    namaMahasiswa: "NAMA MAHASISWA",
-    nim: "NIM MAHASISWA",
+    namaMahasiswa: "M.Dzaky Aburrahman",
+    nim: "2428240148P",
     nomorTopik: 38,
     endpoints: [
       "GET /",
@@ -56,4 +56,43 @@ app.get("/", (req, res) => {
     ]
   });
 });
+
+// GET /student-organizations
+// Body: -
+app.get("/student-organizations", (req, res) => {
+  const { jenis } = req.query;
+
+  // Jika menggunakan filter jenis
+  if (jenis !== undefined) {
+    const filteredData = studentOrganizations.filter(
+      (organization) => organization.jenis === jenis
+    );
+
+    return res.status(200).json(filteredData);
+  }
+
+  // Mengembalikan seluruh data
+  res.status(200).json(studentOrganizations);
+});
+
+// GET /student-organizations/:id
+// Body: -
+app.get("/student-organizations/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const organization = studentOrganizations.find(
+    (item) => item.id === id
+  );
+
+  if (!organization) {
+    return res.status(404).json({
+      status: "error",
+      message: `Data organisasi mahasiswa dengan id ${id} tidak ditemukan`,
+      data: null
+    });
+  }
+
+  res.status(200).json(organization);
+});
+
 
