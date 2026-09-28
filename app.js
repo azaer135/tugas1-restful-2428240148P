@@ -43,7 +43,7 @@ let nextId = 4;
 app.get("/", (req, res) => {
   res.status(200).json({
     namaMahasiswa: "M.Dzaky Aburrahman",
-    nim: "2428240148P",
+    nim: "2428240148p",
     nomorTopik: 38,
     endpoints: [
       "GET /",
@@ -95,4 +95,121 @@ app.get("/student-organizations/:id", (req, res) => {
   res.status(200).json(organization);
 });
 
+// GET /student-organizations/:id
+// Body: -
+app.get("/student-organizations/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const organization = studentOrganizations.find(
+    (item) => item.id === id
+  );
+
+  if (!organization) {
+    return res.status(404).json({
+      status: "error",
+      message: `Data organisasi mahasiswa dengan id ${id} tidak ditemukan`,
+      data: null
+    });
+  }
+
+  res.status(200).json(organization);
+});
+
+// POST /student-organizations
+// Body: {
+//   "nama": "UKM Paduan Suara",
+//   "jenis": "seni",
+//   "ketua": "Maria Anggraini",
+//   "tahunBerdiri": 2008,
+//   "jumlahAnggota": 65
+// }
+app.post("/student-organizations", (req, res) => {
+  const {
+    nama,
+    jenis,
+    ketua,
+    tahunBerdiri,
+    jumlahAnggota
+  } = req.body;
+
+  // Validasi field wajib
+  if (
+    typeof nama !== "string" ||
+    nama.trim() === "" ||
+    typeof jenis !== "string" ||
+    jenis.trim() === "" ||
+    typeof ketua !== "string" ||
+    ketua.trim() === "" ||
+    jumlahAnggota === undefined ||
+    jumlahAnggota === null
+  ) {
+    return res.status(400).json({
+      status: "error",
+      message: "Field wajib: nama, jenis, ketua, dan jumlahAnggota harus diisi",
+      data: null
+    });
+  }
+
+  // Validasi jenis
+  const jenisValid = [
+    "akademik",
+    "olahraga",
+    "seni",
+    "sosial"
+  ];
+
+  if (!jenisValid.includes(jenis)) {
+    return res.status(400).json({
+      status: "error",
+      message: "Jenis harus berupa akademik, olahraga, seni, atau sosial",
+      data: null
+    });
+  }
+
+  // Validasi tipe jumlahAnggota
+  if (
+    typeof jumlahAnggota !== "number" ||
+    !Number.isFinite(jumlahAnggota) ||
+    jumlahAnggota < 0
+  ) {
+    return res.status(400).json({
+      status: "error",
+      message: "jumlahAnggota harus berupa angka dan tidak boleh negatif",
+      data: null
+    });
+  }
+
+  // Validasi tahunBerdiri jika diisi
+  if (
+    tahunBerdiri !== undefined &&
+    (
+      typeof tahunBerdiri !== "number" ||
+      !Number.isFinite(tahunBerdiri)
+    )
+  ) {
+    return res.status(400).json({
+      status: "error",
+      message: "tahunBerdiri harus berupa angka",
+      data: null
+    });
+  }
+
+  const newOrganization = {
+    id: nextId++,
+    nama: nama.trim(),
+    jenis,
+    ketua: ketua.trim(),
+    tahunBerdiri:
+      tahunBerdiri !== undefined ? tahunBerdiri : null,
+    jumlahAnggota
+  };
+
+  studentOrganizations.push(newOrganization);
+
+  res.status(201).json({
+    status: "success",
+    message: "Data organisasi mahasiswa berhasil ditambahkan",
+    data: newOrganization
+  });
+});
 
